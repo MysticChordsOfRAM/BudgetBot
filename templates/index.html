@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cosmo The Budget Bot</title>
+</head>
+<body>
+    <div style = "text-align: center; width: 1070px; margin: 0 auto">
+        <img src="{{ url_for('static', filename='title.png') }}" alt="This is the title">
+        <br><p><strong style = "font-size: 25px;">Welcome to the Documentation for COSMO the Budget Bot!</strong></p>
+        <br><p>COSMO is a friendly helper designed to help you manage your budget. You text him when you spend money and tell him 
+        what type of expense it is and he will do the work of recalculating your remaning budget for the rest of the month. This
+        way, you can (a) avoid opening your bank account to a third party app, and (b) retain some flexibilty and discretion in 
+        your budget. COSMO never sees your actual accounts or finances. You tell him how much money you have to spend, then tell 
+        him when you spend money. His job is a simple running tally, and nothing more. He will never contact you unless you contact
+        him first. In this way, message frequency is determined by your activity. If you're ever confused, text HELP for more details.
+        Message and data rates may apply.</p>
+
+        <div style="border: 1px solid #ccc; padding: 20px; margin: 20px auto; border-radius: 5px; max-width: 500px;">
+        <h3>Authorized User Verification</h3>
+        <p><em>Note: This system is restricted to authorized administrators only. Unrecognized numbers will be discarded.</em></p>
+    
+        <form action="/" method="POST">
+        
+            <label for="phone">Phone Number:</label><br>
+            <input type="tel" id="phone" name="phone" placeholder="+1 (555) 000-0000" required style="width: 100%; padding: 8px; margin-bottom: 10px;">
+        
+            <div style="margin-bottom: 15px; font-size: 0.9em;">
+                <input type="checkbox" id="consent" name="consent" required>
+                <label for="consent">
+                I agree to receive SMS text messages from COSMO. Message frequency varies. 
+                Message and data rates may apply. Reply STOP to opt out. 
+                I have read the <a href="{{ url_for('privacy_policy') }}">Privacy Policy</a>.
+                </label>
+            </div>
+
+            <button type="submit" style="background-color: #802600; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">
+                Verify & Connect
+            </button>
+        </form>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div style="color: red; margin-top: 10px; font-weight: bold; text-align: center;">
+                    {% for message in messages %}
+                        {{ message }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        </div>
+        <br><br>support.cosmothebudgetbot@proton.me
+        <br><a href="{{ url_for('about_us') }}">About Us</a>
+        <br><a href="{{ url_for('terms_of_service') }}">Terms of Service</a>
+        <br><a href="{{ url_for('privacy_policy') }}">Privacy Policy</a>
+    </div>
+</body>
+</html>

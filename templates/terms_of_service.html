@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>About Us</title>
+</head>
+<body>
+    <div style = "text-align: center; width: 1070px; margin: 0 auto">
+        <img src="{{ url_for('static', filename='title.png') }}" alt="This is the title">
+        <br><p><strong style = "font-size: 25px;">Terms of Service</strong></p>
+        <br><strong>Effective Date: November 16, 2025</strong>
+        <div style = "text-align: left;"><br> Welcome to Cosmo The Budget Bot ("Cosmo," "we," "us," or "our"). These Terms of Service ("Terms") 
+        govern your use of the SMS-based budget tracking service. By accessing or using the Service, you agree to 
+        be bound by these Terms.
+        <br><br>1. Description and Acceptance of Service
+        <br><br>A. The Service
+        <br>Cosmo provides an automated, non-commercial, personal budget tracking tool accessed solely via text message. 
+        The service calculates a simple running tally of funds you allocate and expenses you report.
+        <br><br>B. Eligibility
+        <br>This project is currently closed to new users. Use of the Service is limited exclusively to previously invited, 
+        current participants. We reserve the right to deny or terminate access to any user for any reason, at our sole discretion.
+        <br><br>C. Acceptance of Terms
+        <br>By continuing to use the Service, you confirm that you have read, understood, and agree to be bound by these Terms.
+        <br><br>2. Disclaimer of Financial and Professional Advice
+        <br>You acknowledge and agree that:
+        <ul>
+            <li>Not a Financial Professional: Cosmo, and the developer of Cosmo, is not a licensed financial advisor, bank, or credit 
+                institution. The Service is a simple tool for personal reference only.</li>
+            <li>No Professional Advice: The Service does not provide financial, legal, tax, or professional advice. All budget tallies 
+                and calculations are for informational purposes only. You are solely responsible for all decisions regarding your actual 
+                finances and should consult professional advisors for financial guidance.</li>
+            <li>No Warranty: The Service is provided "as is" without warranty of any kind, express or implied.</li>
+        </ul>
+        <br>3. User Conduct and Responsibilities
+        <br><br>A. Accurate data
+        <br>You are responsible for ensuring the accuracy of all expense and budget data you send to Cosmo. We are not responsible for 
+        errors resulting from incorrect data submission.
+        <br><br>B. Lawful Use
+        <br>You agree to use the Service only for lawful purposes and in a way that does not infringe upon the rights of others or 
+        restrict or inhibit anyone else's use and enjoyment of the Service.
+        <br><br>C. Opt-Out
+        <br>You may cease using the Service and terminate your enrollment at any time by replying STOP to any message from Cosmo.
+        <br><br>4. Termination of Service
+        <br>We may, in our sole discretion, suspend or terminate your access to the Service at any time, with or without notice, 
+        if we believe you have breached these Terms or for any other operational reason.
+        <br><br>5. Limitation of Liability
+        <br>To the maximum extent permitted by applicable law, in no event shall Cosmo or its developer be liable for any indirect, 
+        incidental, special, consequential, or punitive damages, or any loss of profits or revenues, whether incurred directly or 
+        indirectly, arising out of your use of the Service.
+        <br><br>6. Governing Law
+        <br> These terms chall be governed by the laws of the United States</div>
+        <br><br>support.cosmothebudgetbot@proton.me
+        <br><a href="{{ url_for('home') }}">Home</a>
+        <br><a href="{{ url_for('about_us') }}">About Us</a>
+        <br><a href="{{ url_for('privacy_policy') }}">Privacy Policy</a>
+    </div>
+</body>
+</html>

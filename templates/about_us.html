@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>About Us</title>
+</head>
+<body>
+    <div style = "text-align: center; width: 1070px; margin: 0 auto">
+        <img src="{{ url_for('static', filename='title.png') }}" alt="This is the title">
+        <br><p><strong style = "font-size: 25px;">About Us</strong></p>
+        <br> This is a hobby project written by one very amateur programmer who is trying to get some Flask experience.
+        He also happens to have a spending problem, and thus is interested in using flask and a raspberry pi to make an A2P budget assistant.
+        He thinks it's a pretty good idea, and is excited about getting it working. 
+        <br><br>support.cosmothebudgetbot@proton.me
+        <br><a href="{{ url_for('home') }}">Home</a>
+        <br><a href="{{ url_for('terms_of_service') }}">Terms of Service</a>
+        <br><a href="{{ url_for('privacy_policy') }}">Privacy Policy</a>
+    </div>
+</body>
+</html>

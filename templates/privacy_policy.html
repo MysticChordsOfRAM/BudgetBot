@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>About Us</title>
+</head>
+<body>
+    <div style = "text-align: center; width: 1070px; margin: 0 auto">
+        <img src="{{ url_for('static', filename='title.png') }}" alt="This is the title">
+        <br><br><p>An initial note: I asked AI to draft this for me. It makes me look much more sophisticated than I am. 
+        From one human being to another: I don't want to invade your privacy. Ignoring the fact that I will never open this service
+        to anyone but myself, I could not be less interested in the lives of users. I don't make any money off of this, and frankly
+        have better things to do than mine data from texts of random strangers. That said - here is some legalese promising the same.</p>
+        <br><p><strong style = "font-size: 25px;">Privacy Policy</strong></p>
+        <br><strong>Effective Date: November 16, 2025</strong>
+        <div style = "text-align: left;"><br><p>This Privacy Policy explains how Cosmo The Budget Bot ("Cosmo," "we," "us," or "our") manages the information collected 
+        from users ("User" or "you") of our SMS-based budget tracking service. Our mission is to provide a highly private budgeting tool; 
+        therefore, we prioritize minimalism and security in our data collection practices.</p>
+        <br>1. Data Collection and Usage
+        <br>We collect and use only the minimal data necessary to operate and improve the Cosmo service.
+        <br><br>A. Information You Provide Directly
+        <br>When you interact with Cosmo via SMS, you provide the following data:
+        <ul>
+            <li>Phone Number: Your mobile number is collected to send and receive messages necessary for the budget service. 
+                This is the primary identifier.</li>
+            <li>Budgetary Data: The amounts you text us (e.g., initial budget, expense amounts, expense categories) are collected 
+                and stored to perform the running tally calculation.</li>
+            <li>Support/Inquiry Data: If you contact us via the support email, your name (if provided) and email address are collected 
+                to respond to your inquiry.</li>
+        </ul>
+        <br>B. Use of Data
+        <br>Your data is used strictly for the following purposes:
+        <ul>
+            <li>Service Operation: To send you automated responses, confirmation of expenses, and your remaining budget tally.</li>
+            <li>Service Improvement: To analyze usage patterns and improve the bot’s responsiveness and functionality.</li>
+            <li>Security and Compliance: To comply with legal requirements and prevent fraud or misuse of the service.</li>
+        </ul>
+        <br>2. Non-Collection and Non-Disclosure
+        <br>Cosmo's core value is privacy. We emphasize the following non-collection and non-disclosure practices:
+        <ul>
+            <li>No Financial Account Information: We do not collect, store, or have access to your bank account details, credit card numbers, 
+                or other sensitive financial credentials. The budget tracking is based solely on numbers you manually input.</li>
+            <li>No Sharing for Marketing: We do not sell, rent, or share your phone number, budgetary data, or personal information 
+                with any third parties for marketing, advertising, or promotional purposes.</li>
+            <li>No Location Tracking: We do not track your geographic location via your mobile device.</li>
+        </ul>
+        <br>3. Data Retention and Security
+        <br>We employ reasonable physical, electronic, and procedural safeguards to protect your information.
+        <ul>
+            <li>Retention: We retain your phone number and budgetary data for as long as you are actively using the service. If you reply STOP, 
+                your active enrollment is terminated, and your data may be securely archived or deleted in accordance with our data retention schedule.</li>
+            <li>Deactivation (Opt-Out): Replying STOP immediately removes you from the active messaging program.</li>
+        </ul>
+        <br>4. Changes to This Policy
+        <br>We reserve the right to modify this Privacy Policy at any time. We will notify you of any changes by posting the new policy on this page. 
+        Your continued use of the service after any such changes constitutes your acceptance of the new Privacy Policy.</div>
+        <br><br>support.cosmothebudgetbot@proton.me
+        <br><a href="{{ url_for('home') }}">Home</a>
+        <br><a href="{{ url_for('about_us') }}">About Us</a>
+        <br><a href="{{ url_for('terms_of_service') }}">Terms of Service</a>
+    </div>
+</body>
+</html>
