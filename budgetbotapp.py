@@ -4,9 +4,11 @@ import psycopg2 as ps
 from twilio.twiml.messaging_response import MessagingResponse
 from flask import Flask, render_template, request, flash
 from collections import namedtuple
+from prometheus_flask_exporter import PrometheusMetrics
 import supersecrets as shh
 
 app = Flask(__name__)
+metrics = PrometheusMetrics(app)
 
 app.secret_key = shh.secret_key
 

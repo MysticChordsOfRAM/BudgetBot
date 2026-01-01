@@ -1,0 +1,5 @@
+flask
+twilio
+gunicorn
+psycopg2-binary
+prometheus-flask-exporter

@@ -4,3 +4,5 @@ __pycache__/
 *.pyc
 .DS_Store
 supersecrets.py
+Dockerfile
+docker-compose.yml
