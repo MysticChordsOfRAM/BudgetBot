@@ -1,14 +1,14 @@
 from datetime import date
-from datetime import datetime
+from datetime import datetime, timezone
 import psycopg2 as ps
 from twilio.twiml.messaging_response import MessagingResponse
-from flask import Flask, render_template, request, flash
+from flask import Flask, render_template, request, flash, Response
 from collections import namedtuple
 from prometheus_flask_exporter import PrometheusMetrics
 import supersecrets as shh
 
 app = Flask(__name__)
-metrics = PrometheusMetrics(app)
+metrics = PrometheusMetrics(app, group_by = 'endpoint')
 
 app.secret_key = shh.secret_key
 
@@ -46,27 +46,142 @@ class CommandProcessor():
                           user = shh.db_user,
                           password = shh.db_password)
     
-    def log_weight(self):
+    def calculate_tdee(self, weight_lbs, height_cm=180, age=32, is_male=True, activity_multiplier=1.2):
+        weight_kg = weight_lbs / 2.20462
+        bmr = (10 * weight_kg) + (6.25 * height_cm) - (5 * age)
+        bmr += 5 if is_male else -161
+        return int(bmr * activity_multiplier)
+    
+    def get_calorie_balance(self, home, cursor):
 
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS prd.calorie_settings (
+                id SERIAL PRIMARY KEY,
+                daily_burn_rate INT,
+                anchor_timestamp TIMESTAMPTZ,
+                anchor_balance NUMERIC(10, 2)
+            );
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS prd.calorie_ledger (
+                id SERIAL PRIMARY KEY,
+                timestamp TIMESTAMPTZ,
+                amount INT
+            );
+        """)
+
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_calorie_ledger_timestamp ON prd.calorie_ledger(timestamp);")
+
+        cursor.execute("""
+            SELECT daily_burn_rate, anchor_timestamp, anchor_balance 
+            FROM prd.calorie_settings 
+            ORDER BY id DESC LIMIT 1
+        """)
+        settings = cursor.fetchone()
+
+        if not settings:
+            cursor.execute("""
+                INSERT INTO prd.calorie_settings (daily_burn_rate, anchor_timestamp, anchor_balance)
+                VALUES (2400, CURRENT_TIMESTAMP, 0) RETURNING daily_burn_rate, anchor_timestamp, anchor_balance
+            """)
+            settings = cursor.fetchone()
+            
+        anchor_time = settings[1]
+        anchor_balance = settings[2]
+        daily_rate = settings[0]
+
+        now = datetime.now(timezone.utc)
+        seconds_elapsed = (now - anchor_time).total_seconds()
+        calories_per_second = daily_rate / 86400
+        accrued_calories = seconds_elapsed * calories_per_second
+
+        cursor.execute("""
+            SELECT COALESCE(SUM(amount), 0) 
+            FROM prd.calorie_ledger 
+            WHERE timestamp >= %s
+        """, (anchor_time,))
+        deductions = cursor.fetchone()[0]
+
+        current_balance = float(anchor_balance) + accrued_calories - float(deductions)
+
+        max_allowance = daily_rate 
+        
+        if current_balance > max_allowance:
+            current_balance = max_allowance
+            
+            cursor.execute("""
+                INSERT INTO prd.calorie_settings (daily_burn_rate, anchor_timestamp, anchor_balance)
+                VALUES (%s, CURRENT_TIMESTAMP, %s)
+            """, (daily_rate, current_balance))
+            home.commit()
+
+        return current_balance
+    
+    def log_weight(self):
         if not self.leaf:
             return "Error: Missing Weight."
         
         try:
+            weight_lbs = float(self.leaf)
+        except ValueError:
+            return f"Error: '{self.leaf}' is not a valid number."
+        
+        try:
             with self.dock_at_echobase() as home:
                 with home.cursor() as cursor:
-                    
                     cursor.execute("CREATE TABLE IF NOT EXISTS prd.weight (tpd VARCHAR(50), tod VARCHAR(50), weight DECIMAL(10, 2));")
                     insert_qry = "INSERT INTO prd.weight (tpd, tod, weight) VALUES (%s, %s, %s);"
-                    cursor.execute(insert_qry, (self.sql_date, self.sql_time, self.leaf))
+                    cursor.execute(insert_qry, (self.sql_date, self.sql_time, weight_lbs))
+
+                    current_balance = self.get_calorie_balance(home, cursor)
+                    new_tdee = self.calculate_tdee(weight_lbs)
+
+                    cursor.execute("""
+                        INSERT INTO prd.calorie_settings (daily_burn_rate, anchor_timestamp, anchor_balance)
+                        VALUES (%s, CURRENT_TIMESTAMP, %s)
+                    """, (new_tdee, current_balance))
 
                     home.commit()
-
-                    return "Weight Logged"
+                    return f"Weight Logged. New TDEE set to {new_tdee} kcal/day."
         
         except Exception as e:
             return f"Database Error: {e}"
 
-        return None
+    def log_calorie_intake(self):
+        if not self.leaf:
+            return "Error: Missing amount."
+            
+        try:
+            calories = int(self.leaf)
+        except ValueError:
+            return f"Error: '{self.leaf}' is not a valid integer."
+
+        try:
+            with self.dock_at_echobase() as home:
+                with home.cursor() as cursor:
+                    # Run balance check first to trigger overflow cap if necessary before inserting
+                    self.get_calorie_balance(home, cursor) 
+
+                    cursor.execute("""
+                        INSERT INTO prd.calorie_ledger (timestamp, amount)
+                        VALUES (CURRENT_TIMESTAMP, %s)
+                    """, (calories,))
+
+                    home.commit()
+                    
+                    new_balance = self.get_calorie_balance(home, cursor)
+                    return f"Logged {calories} kcal. Current budget: {int(new_balance)} kcal."
+        except Exception as e:
+            return f"Database Error in log_calorie_intake: {e}"
+
+    def check_calorie_balance(self):
+        try:
+            with self.dock_at_echobase() as home:
+                with home.cursor() as cursor:
+                    current_balance = self.get_calorie_balance(home, cursor)
+                    return f"Current budget: {int(current_balance)} kcal."
+        except Exception as e:
+            return f"Database Error: {e}"
     
     def log_spending(self):
 
@@ -166,6 +281,8 @@ class CommandProcessor():
 BUDGET (FOOD, FUN, OTHER) (amount)
 BUDGET BALANCE
 BUDGET TOPUP [FOOD] [FUN] [OTHER]
+CALORIE LOG (amount)
+CALORIE BALANCE
 WEIGHT LOG (weight)
         """
         
@@ -182,6 +299,14 @@ WEIGHT LOG (weight)
                 return self.top_up()
             else:
                 return 'Not valid branch command for root BUDGET'
+            
+        elif self.root == 'CALORIE':
+            if self.branch == 'LOG':
+                return self.log_calorie_intake()
+            elif self.branch == 'BALANCE':
+                return self.check_calorie_balance()
+            else:
+                return 'Not valid branch command for root CALORIE'
                      
         elif self.root == 'GUIDE':
             return self.help()

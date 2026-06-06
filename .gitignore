@@ -6,3 +6,5 @@ __pycache__/
 supersecrets.py
 Dockerfile
 docker-compose.yml
+gunicorn_config.py
+
