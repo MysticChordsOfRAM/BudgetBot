@@ -56,11 +56,11 @@ class CommandProcessor():
         cursor.execute("""
             SELECT COALESCE(SUM(amount), 0)
             FROM prd.calorie_ledger
-            WHERE timestamp AT TIME ZONE 'UTC' AT TIME ZONE 'America/New_York' >= date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'America/New_York')
+            WHERE timestamp AT TIME ZONE 'America/New_York' >= date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'America/New_York')
             """)
         return int(cursor.fetchone()[0])
 
-    def get_calorie_balance(self, home, cursor):
+    def get_calorie_balance(self, home, cursor, mid_check = False):
 
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS prd.calorie_settings (
@@ -117,11 +117,12 @@ class CommandProcessor():
         if current_balance > max_allowance:
             current_balance = max_allowance
 
-            cursor.execute("""
-                INSERT INTO prd.calorie_settings (daily_burn_rate, anchor_timestamp, anchor_balance)
-                VALUES (%s, CURRENT_TIMESTAMP, %s)
-            """, (daily_rate, current_balance))
-            home.commit()
+            if not mid_check:
+                cursor.execute("""
+                    INSERT INTO prd.calorie_settings (daily_burn_rate, anchor_timestamp, anchor_balance)
+                    VALUES (%s, CURRENT_TIMESTAMP, %s)
+                """, (daily_rate, current_balance))
+                home.commit()
 
         return current_balance, daily_rate
 
@@ -164,7 +165,7 @@ class CommandProcessor():
                     insert_qry = "INSERT INTO prd.weight (tpd, tod, weight) VALUES (%s, %s, %s);"
                     cursor.execute(insert_qry, (self.sql_date, self.sql_time, weight_lbs))
 
-                    current_balance, _ = self.get_calorie_balance(home, cursor)
+                    current_balance, _ = self.get_calorie_balance(home, cursor, mid_check = True)
                     new_tdee = self.calculate_tdee(weight_lbs)
 
                     cursor.execute("""
